@@ -2,23 +2,25 @@
 
 connect-dynamodb is a DynamoDB session store backed by the [aws-sdk](https://github.com/aws/aws-sdk-js)
 
+** This version is modified to allow read database session value and merge with new change to avoid race condition overriten session data **
+
 ## Installation
 
     $ npm install connect-dynamodb
 
 ## Options
 
-Rational defaults are set but can be overridden in the options object. Credentials and configuration are automatically loaded from [environment variables](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html) or [shared credentials](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html) but may optionally be passed through a JSON file or object. The client attribute is necessary for use with [DynamoDB Local](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) but can be left out if using DynamoDB with your AWS account.  To use [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html), enable it on the table and select the `expires` field.
+Rational defaults are set but can be overridden in the options object. Credentials and configuration are automatically loaded from [environment variables](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html) or [shared credentials](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-shared.html) but may optionally be passed through a JSON file or object. The client attribute is necessary for use with [DynamoDB Local](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) but can be left out if using DynamoDB with your AWS account. To use [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html), enable it on the table and select the `expires` field.
 
-  - One of the following if not using environment variables or shared credentials:
-    - `AWSConfigPath` Optional path to a [file containing your AWS credentials and configuration](http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-configuring.html#Credentials_from_Disk)
-    - `AWSConfigJSON` Optional [JSON object containing your AWS credentials and configuration](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html)
-  - `client` Optional AWS DynamoDB object from `new AWS.DynamoDB()`
-  - `AWSRegion` Optional AWS region (defaults to 'us-east-1', ignored if using `AWSConfigPath` or `AWSConfigJSON`)
-  - `table` Optional DynamoDB server session table name (defaults to "sessions")
-  - `hashKey` Optional hash key (defaults to "id")
-  - `prefix` Optional key prefix (defaults to "sess")
-  - `reapInterval` Legacy session expiration cleanup in milliseconds.  Should instead enable [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html) and select the `expires` field.  **BREAKING CHANGE** from v1.0.11 to v2.0.0 for reaping sessions with changes to the format of the expires field timestamp.
+- One of the following if not using environment variables or shared credentials:
+  - `AWSConfigPath` Optional path to a [file containing your AWS credentials and configuration](http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-configuring.html#Credentials_from_Disk)
+  - `AWSConfigJSON` Optional [JSON object containing your AWS credentials and configuration](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html)
+- `client` Optional AWS DynamoDB object from `new AWS.DynamoDB()`
+- `AWSRegion` Optional AWS region (defaults to 'us-east-1', ignored if using `AWSConfigPath` or `AWSConfigJSON`)
+- `table` Optional DynamoDB server session table name (defaults to "sessions")
+- `hashKey` Optional hash key (defaults to "id")
+- `prefix` Optional key prefix (defaults to "sess")
+- `reapInterval` Legacy session expiration cleanup in milliseconds. Should instead enable [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html) and select the `expires` field. **BREAKING CHANGE** from v1.0.11 to v2.0.0 for reaping sessions with changes to the format of the expires field timestamp.
 
 ## Usage
 
@@ -67,7 +69,7 @@ With [express 4](http://expressjs.com/)
     var DynamoDBStore = require('connect-dynamodb')({session: session});
     app.use(session({store: new DynamoDBStore(options), secret: 'keyboard cat'}));
 
-OR 
+OR
 
     var app = express();
     var session = require('express-session');
@@ -97,7 +99,9 @@ npm test
 ```
 
 ## IAM Permissions
+
 Connect DynamoDB requires the following IAM permissions for DynamoDB:
+
 - CreateTable
 - PutItem
 - DeleteItem
@@ -107,7 +111,7 @@ Connect DynamoDB requires the following IAM permissions for DynamoDB:
 
 Sample IAM policy (with least privilege):
 
-_(Replace __\<AWS ACCOUNT ID\>__, __\<TABLE NAME\>__ and __\<SOURCE IP AND BITMASK\>__)._
+_(Replace **\<AWS ACCOUNT ID\>**, **\<TABLE NAME\>** and **\<SOURCE IP AND BITMASK\>**)._
 
 ```
 {
