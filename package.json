@@ -12,10 +12,13 @@
     "connect": "*"
   },
   "devDependencies": {
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
     "express-session": "*",
+    "husky": "^6.0.0",
     "mocha": "*",
-    "sinon": "*",
-    "should": "*"
+    "should": "*",
+    "sinon": "*"
   },
   "engines": {
     "node": "*"
