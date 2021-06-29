@@ -1,12 +1,16 @@
 # Connect DynamoDB
 
+This project was forked from https://github.com/ca98am79/connect-dynamodb and upgrade the code to moderm syntax + devtools. Going forward, I wil maintain and keep library up to date
+
 connect-dynamodb is a DynamoDB session store backed by the [aws-sdk](https://github.com/aws/aws-sdk-js)
 
 ** This version is modified to allow read database session value and merge with new change to avoid race condition overriten session data **
 
 ## Installation
 
+```sh
     $ npm install connect-dynamodb
+```
 
 ## Options
 
@@ -20,11 +24,13 @@ Rational defaults are set but can be overridden in the options object. Credentia
 - `table` Optional DynamoDB server session table name (defaults to "sessions")
 - `hashKey` Optional hash key (defaults to "id")
 - `prefix` Optional key prefix (defaults to "sess")
-- `reapInterval` Legacy session expiration cleanup in milliseconds. Should instead enable [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html) and select the `expires` field. **BREAKING CHANGE** from v1.0.11 to v2.0.0 for reaping sessions with changes to the format of the expires field timestamp.
+- `reapInterval` Legacy session expiration cleanup in milliseconds. Should instead enable [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html) and select the `expires` field.
+- **BREAKING CHANGE** from v1.0.11 to v2.0.0 for reaping sessions with changes to the format of the expires field timestamp.
 
 ## Usage
 
-    var options = {
+````js
+    const options = {
         // Optional DynamoDB table name, defaults to 'sessions'
         table: 'myapp-sessions',
 
@@ -45,36 +51,42 @@ Rational defaults are set but can be overridden in the options object. Credentia
         readCapacityUnits: 25,
         writeCapacityUnits: 25
     };
+    ```
 
-With [connect](https://github.com/senchalabs/connect)
-
+### with connect  [connect](https://github.com/senchalabs/connect)
+```js
     var connect = require('connect');
     var DynamoDBStore = require('connect-dynamodb')(connect);
     connect()
         .use(connect.cookieParser())
         .use(connect.session({ store: new DynamoDBStore(options), secret: 'keyboard cat'}));
+````
 
-With [express 3](http://expressjs.com/en/3x/api.html)
+### With [express 3](http://expressjs.com/en/3x/api.html)
 
+```js
     var DynamoDBStore = require('connect-dynamodb')(express);
     var app = express(
         express.cookieParser(),
         express.session({ store: new DynamoDBStore(options), secret: 'keyboard cat'});
     );
+```
 
-With [express 4](http://expressjs.com/)
+### With [express 4](http://expressjs.com/)
 
-    var app = express();
-    var session = require('express-session');
-    var DynamoDBStore = require('connect-dynamodb')({session: session});
-    app.use(session({store: new DynamoDBStore(options), secret: 'keyboard cat'}));
+```js
+var app = express();
+var session = require('express-session');
+var DynamoDBStore = require('connect-dynamodb')({ session: session });
+app.use(session({ store: new DynamoDBStore(options), secret: 'keyboard cat' }));
 
-OR
+OR;
 
-    var app = express();
-    var session = require('express-session');
-    var DynamoDBStore = require('connect-dynamodb')(session);
-    app.use(session({store: new DynamoDBStore(options), secret: 'keyboard cat'}));
+var app = express();
+var session = require('express-session');
+var DynamoDBStore = require('connect-dynamodb')(session);
+app.use(session({ store: new DynamoDBStore(options), secret: 'keyboard cat' }));
+```
 
 ## Testing
 
@@ -138,6 +150,6 @@ _(Replace **\<AWS ACCOUNT ID\>**, **\<TABLE NAME\>** and **\<SOURCE IP AND BITMA
 
 connect-dynamodb is licensed under the [MIT license.](https://github.com/ca98am79/connect-dynamodb/blob/master/LICENSE.txt)
 
-## Donations
+## Credits
 
-I made this in my spare time, so if you find it useful you can donate at my BTC address: `35dwLrmKHjCgGXyLzBSd6YaTgoXQA17Aoq`. Thank you very much!
+All credeit to creator and maintainer of original repo (https://github.com/ca98am79/connect-dynamodb)[https://github.com/ca98am79/connect-dynamodb]
