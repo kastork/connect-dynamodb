@@ -1,3 +1,19 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [2.1.0](https://github.com/samuraitruong/connect-dynamodb/compare/v1.0.4...v2.1.0) (2021-06-30)
+
+
+### Features
+
+* refactoring the code to typescipt and module ([f405851](https://github.com/samuraitruong/connect-dynamodb/commit/f405851a064ba756173fa29cb7a533045ef15520))
+
+
+### Bug Fixes
+
+* correct check server side expires session ([5a1aba2](https://github.com/samuraitruong/connect-dynamodb/commit/5a1aba2de2d8ef3305bc9dc49742970456d2935a))
+
 2.0.4 / 2019-11-15
 
   * Don't crash on invalid session data stored in DDB (https://github.com/ca98am79/connect-dynamodb/issues/44)
