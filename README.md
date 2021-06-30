@@ -1,5 +1,7 @@
 # Connect DynamoDB
 
+[![CI](https://github.com/samuraitruong/connect-dynamodb/actions/workflows/release.yml/badge.svg)](https://github.com/samuraitruong/connect-dynamodb/actions/workflows/release.yml)
+
 This project was forked from https://github.com/ca98am79/connect-dynamodb and upgrade the code to moderm syntax + devtools. Going forward, I wil maintain and keep library up to date
 
 connect-dynamodb is a DynamoDB session store backed by the [aws-sdk](https://github.com/aws/aws-sdk-js)
@@ -9,7 +11,9 @@ connect-dynamodb is a DynamoDB session store backed by the [aws-sdk](https://git
 ## Installation
 
 ```sh
-    $ npm install connect-dynamodb
+    npm install @samuraitruong/connect-dynamodb
+    or
+    yarn add @samuraitruong/connect-dynamodb
 ```
 
 ## Options
