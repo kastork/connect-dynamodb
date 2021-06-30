@@ -28,6 +28,12 @@ jobs:
   release:
     needs: [build]
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
+
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
@@ -48,7 +54,7 @@ jobs:
 
       - name: Release
         run: |
-          yarn release
-          git push --follow-tags origin master && npm publish
+          yarn release --dry-run
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+        #          git push --follow-tags origin master && npm publish

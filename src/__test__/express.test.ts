@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { app } from './app';
+jest.setTimeout(30000)
 describe('Test connect', () => {
 
   it('responds with json', (done) => {
