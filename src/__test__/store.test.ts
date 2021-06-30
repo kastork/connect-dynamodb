@@ -1,24 +1,15 @@
-import fs from 'fs';
 import AWS from 'aws-sdk';
 import session from 'express-session';
 import connect from '../index';
 const DynamoDBStore = connect({ session: session });
 
-let client: any;
-
-if (config) {
-    client = new AWS.DynamoDB(JSON.parse(config));
-}
-else if (process.env.AWS_CONFIG_JSON) {
-    var config = JSON.parse(process.env.AWS_CONFIG_JSON);
-    client = new AWS.DynamoDB(config);
-}
+const client = new AWS.DynamoDB({ endpoint: "http://localhost:8000", region: 'us-east-1' });
 
 describe('DynamoDBStore', function () {
 
     describe('Setting', function () {
         it('should store data correctly', async () => {
-            var store = new DynamoDBStore({
+            const store = new DynamoDBStore({
                 client,
                 table: 'sessions-test'
             });
@@ -37,7 +28,7 @@ describe('DynamoDBStore', function () {
     describe('Getting', function () {
 
         beforeAll(async () => {
-            var store = new DynamoDBStore({
+            const store = new DynamoDBStore({
                 client,
                 table: 'sessions-test'
             });
@@ -51,7 +42,7 @@ describe('DynamoDBStore', function () {
 
 
         it('should get data correctly', async () => {
-            var store = new DynamoDBStore({
+            const store = new DynamoDBStore({
                 client,
                 table: 'sessions-test'
             });

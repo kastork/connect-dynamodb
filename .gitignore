@@ -3,3 +3,4 @@ aws-config.json
 .DS_Store
 dist/
 .env
+.eslintcache
