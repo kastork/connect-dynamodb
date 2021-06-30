@@ -11,5 +11,6 @@ import { DynamoDBStore } from './store';
 
 export default function connect(store: any) {
 
+  console.log("session object", store)
   return DynamoDBStore
 }

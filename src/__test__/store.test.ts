@@ -5,14 +5,15 @@ const DynamoDBStore = connect({ session: session });
 
 const client = new AWS.DynamoDB({ endpoint: "http://localhost:8000", region: 'us-east-1' });
 
+const store = new DynamoDBStore({
+    client,
+    table: 'sessions-test'
+});
+
 describe('DynamoDBStore', function () {
 
     describe('Setting', function () {
         it('should store data correctly', async () => {
-            const store = new DynamoDBStore({
-                client,
-                table: 'sessions-test'
-            });
 
             await store.set('123', {
                 cookie: {
@@ -28,10 +29,6 @@ describe('DynamoDBStore', function () {
     describe('Getting', function () {
 
         beforeAll(async () => {
-            const store = new DynamoDBStore({
-                client,
-                table: 'sessions-test'
-            });
             await store.set('1234', {
                 cookie: {
                     maxAge: 2000
@@ -42,10 +39,7 @@ describe('DynamoDBStore', function () {
 
 
         it('should get data correctly', async () => {
-            const store = new DynamoDBStore({
-                client,
-                table: 'sessions-test'
-            });
+
             await store.get('1234', (err, res) => {
                 if (err) throw err;
                 expect(res.cookie).toEqual({
@@ -56,96 +50,66 @@ describe('DynamoDBStore', function () {
             });
         });
 
-        // it('does not crash on invalid session object', function (done) {
-        //     var store = new DynamoDBStore({
-        //         client,
-        //         table: 'sessions-test'
-        //     });
+        it('does not crash on invalid session object', async () => {
 
-        //     sandbox.stub(store.client, 'getItem').callsArgWith(1, null, {
-        //         Item: {}
-        //     });
-
-        //     store.get('9876', function (err, res) {
-        //         if (err) throw err;
-        //         should.not.exist(res);
-
-        //         done();
-        //     });
-        // });
+            await store.get('error-session', (err, res) => {
+                if (err) throw err;
+                expect(res).toEqual(undefined)
+            });
+        });
 
     });
-    // describe('Touching', function () {
-    //     var sess = {
-    //         cookie: {
-    //             maxAge: 2000
-    //         },
-    //         name: 'tj'
-    //     };
-    //     var maxAge = null;
-    //     before(function (done) {
-    //         var store = new DynamoDBStore({
-    //             client,
-    //             table: 'sessions-test'
-    //         });
+    describe('Touching', function () {
+        const sess = {
+            cookie: {
+                maxAge: 2000
+            },
+            name: 'tj'
+        };
+        let maxAge = 0;
+        beforeEach(async () => {
 
-    //         maxAge = (Math.floor((Date.now() + 2000) / 1000));
-    //         store.set('1234', sess, done);
-    //     });
+            maxAge = (Math.floor((Date.now() + 2000) / 1000));
+            await store.set('1234', sess, jest.fn());
+        });
 
-    //     it('should touch data correctly', function (done) {
-    //         this.timeout(4000);
-    //         var store = new DynamoDBStore({
-    //             client,
-    //             table: 'sessions-test'
-    //         });
-    //         setTimeout(function () {
-    //             store.touch('1234', sess, function (err, res) {
-    //                 if (err) throw err;
-    //                 var expires = res.Attributes.expires.N;
-    //                 expires.should.be.above(maxAge);
-    //                 (expires - maxAge).should.be.aboveOrEqual(1);
-    //                 done();
-    //             });
-    //         }, 1510);
-    //     });
+        it('should touch data correctly', async () => {
+            await new Promise(r => setTimeout(r, 2000));
+            const res: any = await store.touch('1234', sess);
+            const expires = +res.Attributes.expires.N;
+            expect(expires).toBeGreaterThan(maxAge)
+        });
 
-    // });
-    // describe('Destroying', function () {
-    //     before(function (done) {
-    //         var store = new DynamoDBStore({
-    //             client,
-    //             table: 'sessions-test'
-    //         });
-    //         store.set('12345', {
-    //             cookie: {
-    //                 maxAge: 2000
-    //             },
-    //             name: 'tj'
-    //         }, done);
-    //     });
+    });
 
-    //     it('should destroy data correctly', function (done) {
-    //         var store = new DynamoDBStore({
-    //             client,
-    //             table: 'sessions-test'
-    //         });
-    //         store.destroy('12345', function (err, res) {
-    //             if (err) throw err;
+    describe('Destroying', function () {
+        beforeAll(async () => {
+            await store.set('12345', {
+                cookie: {
+                    maxAge: 2000
+                },
+                name: 'tj'
+            }, jest.fn());
+        });
 
-    //             store.get('12345', function (err, res) {
-    //                 if (err) throw err;
-    //                 should.not.exist(res);
+        it('should destroy data correctly', async () => {
+            const store = new DynamoDBStore({
+                client,
+                table: 'sessions-test'
+            });
+            const test = await store.get('12345', (err, res) => res);
+            expect(test).not.toEqual(null);
 
-    //                 done();
-    //             });
-    //         });
-    //     });
+            await store.destroy('12345');
 
-    // });
+            const again = await store.get('12345', (err, res) => res);
+            expect(again).toBe(undefined);
+        });
+
+    });
     // describe('Reaping', function () {
-    //     before(function (done) {
-    //         var store = new DynamoDBStore({
+    //     before(async() => {
+    //         const store = new DynamoDBStore({
     //             client,
     //             table: 'sessions-test'
     //         });
@@ -157,9 +121,9 @@ describe('DynamoDBStore', function () {
     //         }, done);
     //     });
 
-    //     it('should reap data correctly', function (done) {
+    //     it('should reap data correctly', async() => {
     //         this.timeout(5000); // increased timeout for local dynamo
-    //         var store = new DynamoDBStore({
+    //         const store = new DynamoDBStore({
     //             client,
     //             table: 'sessions-test'
     //         });

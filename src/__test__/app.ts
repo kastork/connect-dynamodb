@@ -1,6 +1,6 @@
 import express from 'express';
 import expressSession from 'express-session';
-import dynamodbConnect from "../../src/index";
+import { DynamoDBStore } from "../../src/store";
 import AWS from 'aws-sdk';
 
 
@@ -13,7 +13,6 @@ export function app() {
     })
   };
 
-  const DynamoDBStore = dynamodbConnect(options);
   _app.use(expressSession({ store: new DynamoDBStore(options), secret: 'keyboard cat' }));
 
   _app.use(expressSession({

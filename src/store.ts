@@ -103,13 +103,12 @@ export class DynamoDBStore extends Store {
    */
   async get(sid: string, fn: (err?: any, data?: any) => any) {
     await this.prepareTable();
-    sid = this.prefix + sid;
     const now = Math.floor(Date.now() / 1000);
     const params = {
       TableName: this.table,
       Key: {
         [this.hashKey]: {
-          S: sid,
+          S: this.prefix + sid,
         }
       },
       ConsistentRead: true,
@@ -205,7 +204,9 @@ export class DynamoDBStore extends Store {
     };
     try {
       const data = await this.client.scan(params).promise()
-      this.destroy(data);
+      for await (const item of data.Items || []) {
+        await this.destroy(item[this.hashKey].S || '');
+      }
     } catch (err) {
       console.log(err)
       throw err;
@@ -221,17 +222,16 @@ export class DynamoDBStore extends Store {
   * @param {Function} fn
   * @api public
   */
-  async destroy(data: any) {
+  async destroy(sid: string) {
 
-    for await (const item of data.Items) {
-
-      if (item[this.hashKey]
-      ) {
-        let sid = item[this.hashKey].S;
-        sid = sid.substring(this.prefix.length, sid.length);
-        // destroy
+    await this.client.deleteItem({
+      TableName: this.table, Key: {
+        [this.hashKey]: {
+          S: sid = this.prefix + sid
+        }
       }
-    }
+    }).promise();
+
   }
 
   /**
@@ -259,7 +259,7 @@ export class DynamoDBStore extends Store {
       ReturnValues: 'UPDATED_NEW',
     };
 
-    await this.client.updateItem(params).promise()
+    return await this.client.updateItem(params).promise()
   }
 
   /**
