@@ -1,14 +1,14 @@
 /*!
  * Connect - DynamoDB
- * Copyright(c) 2020 introvert.com LLC <support@introvert.com>
+ * Copyright(c) 2020 introvert.com LLC <support@introvert.com>, forked and upgrade by samuraitruong
  * MIT Licensed
  */
 
 import AWS from 'aws-sdk';
-import { Store } from 'express-session';
+import session from 'express-session';
 import { oneDayInMilliseconds } from './constants';
 
-export class DynamoDBStore extends Store {
+export class DynamoDBStore extends session.Store {
   private connect: any = {};
   private options: any;
 
@@ -117,7 +117,7 @@ export class DynamoDBStore extends Store {
       const result = await this.client.getItem(params).promise();
       if (!(result.Item && result.Item.sess && result.Item.sess.S))
         return fn(null);
-      else if (result.Item.expires && now >= result.Item.expires) {
+      else if (result.Item.expires && now >= +(result.Item.expires?.N || 0)) {
         return fn(null);
       } else {
         const sessStr = result.Item.sess.S.toString();
@@ -222,7 +222,7 @@ export class DynamoDBStore extends Store {
   * @param {Function} fn
   * @api public
   */
-  async destroy(sid: string) {
+  async destroy(sid: string, fn?: (err?: any) => void) {
 
     await this.client.deleteItem({
       TableName: this.table, Key: {
@@ -231,6 +231,8 @@ export class DynamoDBStore extends Store {
         }
       }
     }).promise();
+
+    fn && fn(null)
 
   }
 
@@ -283,5 +285,10 @@ export class DynamoDBStore extends Store {
   clearInterval() {
     if (this._reap) clearInterval(this._reap);
   }
+  // regenerate(re: any, fn: Function) {
+
+  //   console.log(re)
+  //   fn(re)
+  // }
 
 }

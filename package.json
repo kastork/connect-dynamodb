@@ -7,10 +7,10 @@
   "typings": "./dist/index.d.ts",
   "scripts": {
     "lint": "eslint . --fix",
-    "test": "jest **/*.test.ts",
+    "test": "jest",
     "prepublish": "npm run build",
     "release": "standard-version",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "prepare": "husky install"
   },
   "dependencies": {

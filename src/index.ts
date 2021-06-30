@@ -1,4 +1,5 @@
 import { DynamoDBStore } from './store';
+import { Store } from 'express-session';
 
 
 /**
@@ -9,8 +10,6 @@ import { DynamoDBStore } from './store';
  * @api public
  */
 
-export default function connect(store: any) {
-
-  console.log("session object", store)
+export default function connect(session: any) {
   return DynamoDBStore
 }
