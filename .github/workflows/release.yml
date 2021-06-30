@@ -13,6 +13,9 @@ jobs:
         image: amazon/dynamodb-local
         ports:
           - 8000:8000
+    env:
+      AWS_ACCESS_KEY_ID: 'foo'
+      AWS_SECRET_ACCESS_KEY: dump
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js environment
