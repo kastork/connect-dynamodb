@@ -99,10 +99,10 @@ npm test
 You can also run it locally by running the following two scripts in separate terminals:
 
 ```
-docker run -it --rm \
+docker run -it --rm -d \
   --name=dynamodb-test \
   -p 127.0.0.1:8000:8000 \
-  deangiberson/aws-dynamodb-local
+  amazon/dynamodb-local
 ```
 
 ```

@@ -20,6 +20,7 @@ export class DynamoDBStore extends Store {
   private table: string;
   private reapInterval: number;
   private _reap: any;
+  private _tableInfo: any = null;
 
   /**
   * Initialize DynamoDBStore with the given `options`.
@@ -56,19 +57,20 @@ export class DynamoDBStore extends Store {
     if (this.reapInterval > 0) {
       this._reap = setInterval(this.reap.bind(this), this.reapInterval);
     }
-
-    this.prepareTable();
+    this.prepareTable = this.prepareTable.bind(this);
   }
 
   async prepareTable() {
+    if (this._tableInfo) return;
     try {
       const info = await this.client.describeTable(
         {
           TableName: this.table,
         }).promise();
-      console.log(info)
+      this._tableInfo = info;
+      // console.log(info)
     } catch (err) {
-      await this.client.createTable(
+      this._tableInfo = await this.client.createTable(
         {
           TableName: this.table,
           AttributeDefinitions: [
@@ -100,7 +102,7 @@ export class DynamoDBStore extends Store {
    * @api public
    */
   async get(sid: string, fn: (err?: any, data?: any) => any) {
-
+    await this.prepareTable();
     sid = this.prefix + sid;
     const now = Math.floor(Date.now() / 1000);
     const params = {
@@ -139,6 +141,7 @@ export class DynamoDBStore extends Store {
    * @api public
    */
   async set(sid: string, currentSess: any, fn: (err?: any) => any) {
+    await this.prepareTable();
     try {
       const oldSession = await this.get(sid, (err, data) => data);
       const newSess = Object.assign({}, oldSession, currentSess);
