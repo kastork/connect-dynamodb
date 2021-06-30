@@ -54,7 +54,7 @@ jobs:
 
       - name: Release
         run: |
-          yarn release --dry-run
+          yarn release
+          git push --follow-tags origin master && npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-        #          git push --follow-tags origin master && npm publish
