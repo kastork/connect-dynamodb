@@ -1,0 +1,12 @@
+src/
+.github
+.husky
+.env
+.gitignore
+.commitlint.config.js
+tsconfig.json
+tsconfig.build.json
+*.tgz
+.eslintcache
+.eslintignore
+.eslintrc.json
