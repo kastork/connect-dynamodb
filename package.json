@@ -7,7 +7,7 @@
   "typings": "./dist/index.d.ts",
   "scripts": {
     "lint": "eslint . --fix",
-    "test": "jest",
+    "test": "jest --forceExit",
     "prepublish": "npm run build",
     "release": "standard-version",
     "build": "tsc -p tsconfig.build.json",
