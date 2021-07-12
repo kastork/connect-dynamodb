@@ -71,26 +71,34 @@ export class DynamoDBStore extends session.Store {
       this._tableInfo = info;
       // console.log(info)
     } catch (err) {
-      this._tableInfo = await this.client.createTable(
-        {
-          TableName: this.table,
-          AttributeDefinitions: [
-            {
-              AttributeName: this.hashKey,
-              AttributeType: 'S',
+      try {
+        this._tableInfo = await this.client.createTable(
+          {
+            TableName: this.table,
+            AttributeDefinitions: [
+              {
+                AttributeName: this.hashKey,
+                AttributeType: 'S',
+              },
+            ],
+            KeySchema: [
+              {
+                AttributeName: this.hashKey,
+                KeyType: 'HASH',
+              },
+            ],
+            ProvisionedThroughput: {
+              ReadCapacityUnits: this.readCapacityUnits,
+              WriteCapacityUnits: this.writeCapacityUnits,
             },
-          ],
-          KeySchema: [
-            {
-              AttributeName: this.hashKey,
-              KeyType: 'HASH',
-            },
-          ],
-          ProvisionedThroughput: {
-            ReadCapacityUnits: this.readCapacityUnits,
-            WriteCapacityUnits: this.writeCapacityUnits,
-          },
-        }).promise();
+          }).promise();
+      }
+      catch (err) {
+        console.log(err)
+        if (err.message !== 'Cannot create preexisting table') {
+          throw err
+        }
+      }
     }
 
   }
