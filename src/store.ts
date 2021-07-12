@@ -58,6 +58,7 @@ export class DynamoDBStore extends session.Store {
       this._reap = setInterval(this.reap.bind(this), this.reapInterval);
     }
     this.prepareTable = this.prepareTable.bind(this);
+    this.prepareTable();
   }
 
   async prepareTable() {
