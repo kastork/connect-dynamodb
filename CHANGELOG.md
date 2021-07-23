@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.4](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.3...v2.1.4) (2021-07-12)
+
+
+### Bug Fixes
+
+* initialize create table on construct ([790b5d2](https://github.com/samuraitruong/connect-dynamodb/commit/790b5d2741767d7d4efdffb8316ae5005162f9c3))
+* table existing ([6915a7e](https://github.com/samuraitruong/connect-dynamodb/commit/6915a7e420e0cee25f6c985f67fde4b960616167))
+
 ### [2.1.3](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.2...v2.1.3) (2021-07-01)
 
 ### [2.1.2](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.1...v2.1.2) (2021-07-01)
