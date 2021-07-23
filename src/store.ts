@@ -131,7 +131,6 @@ export class DynamoDBStore extends session.Store {
       } else {
         const sessStr = result.Item.sess.S.toString();
         const sess = JSON.parse(sessStr);
-        sess.lastRead = new Date().getTime();
         return fn(null, sess);
       }
     }
