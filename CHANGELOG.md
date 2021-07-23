@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.5](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.4...v2.1.5) (2021-07-23)
+
+
+### Bug Fixes
+
+* remove lastRead which cause session always change ([87fba99](https://github.com/samuraitruong/connect-dynamodb/commit/87fba99a299e05e0787d58a96cf0d3bedce030ca))
+
 ### [2.1.4](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.3...v2.1.4) (2021-07-12)
 
 
