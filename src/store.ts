@@ -94,9 +94,9 @@ export class DynamoDBStore extends session.Store {
           }).promise();
       }
       catch (err) {
-        console.log(err)
-        if (err.message !== 'Cannot create preexisting table') {
-          throw err
+        if (err.code !== 'ResourceInUseException') {
+          console.log(err);
+          throw err;
         }
       }
     }
