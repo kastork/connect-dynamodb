@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.7](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.6...v2.1.7) (2021-07-26)
+
+
+### Bug Fixes
+
+* return value and update touch test for backwards compatibility ([ace121a](https://github.com/samuraitruong/connect-dynamodb/commit/ace121ae5fc86229d2918d8c5d2a1433caa8e6c8))
+* touch implementation should use callback ([f485ee9](https://github.com/samuraitruong/connect-dynamodb/commit/f485ee93f84650fdbde15784c7a773a191de2baa))
+
 ### [2.1.6](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.5...v2.1.6) (2021-07-26)
 
 ### [2.1.5](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.4...v2.1.5) (2021-07-23)
