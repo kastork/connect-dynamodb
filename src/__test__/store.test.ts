@@ -73,11 +73,24 @@ describe('DynamoDBStore', function () {
             await store.set('1234', sess, jest.fn());
         });
 
-        it('should touch data correctly', async () => {
+        it('should touch data correctly', (done) => {
+            setTimeout(() => {
+                // express-session uses callback instead of promise
+                // @see https://github.com/expressjs/session#storetouchsid-session-callback
+                store.touch('1234', sess, (err, res) => {
+                    expect(err).toBeNull();
+                    const expires = +res.Attributes.expires.N;
+                    expect(expires).toBeGreaterThan(maxAge);
+                    done();
+                });         
+            }, 2000);              
+        });
+
+        it('should also support promise for backwards compatibility', async () => {
             await new Promise(r => setTimeout(r, 2000));
             const res: any = await store.touch('1234', sess);
             const expires = +res.Attributes.expires.N;
-            expect(expires).toBeGreaterThan(maxAge)
+            expect(expires).toBeGreaterThan(maxAge);
         });
 
     });
