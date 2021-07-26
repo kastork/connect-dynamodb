@@ -272,8 +272,10 @@ export class DynamoDBStore extends session.Store {
     try {
       const updated = await this.client.updateItem(params).promise();
       fn && fn(null, updated);
+      return updated;
     } catch (error) {
-      fn &&fn(error);
+      fn && fn(error);
+      throw error;
     }    
   }
 
