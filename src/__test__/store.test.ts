@@ -90,7 +90,7 @@ describe('DynamoDBStore', function () {
             await new Promise(r => setTimeout(r, 2000));
             const res: any = await store.touch('1234', sess);
             const expires = +res.Attributes.expires.N;
-            expect(expires).toBeGreaterThan(maxAge);  
+            expect(expires).toBeGreaterThan(maxAge);
         });
 
     });
