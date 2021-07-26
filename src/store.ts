@@ -250,7 +250,7 @@ export class DynamoDBStore extends session.Store {
    * @param  {Object}   sess Session object.
    * @param  {Function} fn   Callback.
    */
-  async touch(sid: string, sess: any) {
+  async touch(sid: string, sess: any, fn?: (err?: any, updated?: any) => void) {
     sid = this.prefix + sid;
     const expires = this.getExpiresValue(sess);
     const params = {
@@ -269,7 +269,12 @@ export class DynamoDBStore extends session.Store {
       ReturnValues: 'UPDATED_NEW',
     };
 
-    return await this.client.updateItem(params).promise()
+    try {
+      const updated = await this.client.updateItem(params).promise();
+      fn && fn(null, updated);
+    } catch (error) {
+      fn &&fn(error);
+    }    
   }
 
   /**
