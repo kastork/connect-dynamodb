@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.7...v2.2.0) (2021-09-07)
+
+
+### Features
+
+* add support separate field for ttl ([849ccae](https://github.com/samuraitruong/connect-dynamodb/commit/849ccaedad7c9e208c517cbcbdec24bbab69d725))
+
 ### [2.1.7](https://github.com/samuraitruong/connect-dynamodb/compare/v2.1.6...v2.1.7) (2021-07-26)
 
 
