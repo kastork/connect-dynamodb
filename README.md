@@ -29,6 +29,8 @@ Rational defaults are set but can be overridden in the options object. Credentia
 - `hashKey` Optional hash key (defaults to "id")
 - `prefix` Optional key prefix (defaults to "sess")
 - `reapInterval` Legacy session expiration cleanup in milliseconds. Should instead enable [DynamoDB TTL](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html) and select the `expires` field.
+- `ttl`: the values in second that will set for `ttlFieldName` field default = 365 days
+- `ttlFieldName`: set the column name for ttl, default = ttl
 - **BREAKING CHANGE** from v1.0.11 to v2.0.0 for reaping sessions with changes to the format of the expires field timestamp.
 
 ## Usage
@@ -54,6 +56,8 @@ Rational defaults are set but can be overridden in the options object. Credentia
         // Optional ProvisionedThroughput params, defaults to 5
         readCapacityUnits: 25,
         writeCapacityUnits: 25
+        // TTL default set to 1 year, below to set ttl to 30 days
+        ttl: 30 * 3600 * 24
     };
     ```
 

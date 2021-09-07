@@ -7,7 +7,8 @@ const client = new AWS.DynamoDB({ endpoint: "http://localhost:8000", region: 'us
 
 const store = new DynamoDBStore({
     client,
-    table: 'sessions-test'
+    table: 'sessions-test',
+    ttl: 5000
 });
 
 describe('DynamoDBStore', function () {
@@ -24,6 +25,23 @@ describe('DynamoDBStore', function () {
                 expect(err).toEqual(null)
             });
         });
+
+        it('should set ttl value ', async () => {
+            const now = Math.floor(new Date().getTime() / 1000);
+
+            await store.set('789', {
+                cookie: {
+                    maxAge: 2000
+                },
+                name: 'test'
+            }, (err) => {
+                expect(err).toEqual(null)
+            });
+            const sess = await store.get('789', (err, data) => data);
+            expect(sess.__ttl__).toBeGreaterThanOrEqual(now);
+            expect(sess.__ttl__).toBeLessThanOrEqual(now + 5000)
+        });
+
 
     });
     describe('Getting', function () {
@@ -82,8 +100,8 @@ describe('DynamoDBStore', function () {
                     const expires = +res.Attributes.expires.N;
                     expect(expires).toBeGreaterThan(maxAge);
                     done();
-                });         
-            }, 2000);              
+                });
+            }, 2000);
         });
 
         it('should also support promise for backwards compatibility', async () => {

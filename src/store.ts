@@ -32,7 +32,8 @@ export class DynamoDBStore extends session.Store {
     super(options);
 
     this.options = options || {};
-
+    this.options.ttl = this.options.ttl || 365 * 24 * 3600; // defaut to 1 years
+    this.options.ttlFieldName = this.options.ttlFieldName || 'ttl'; // defaut to 1 years
     this.prefix = null == options.prefix ? 'sess:' : options.prefix;
     this.hashKey = null == options.hashKey ? 'id' : options.hashKey;
     this.readCapacityUnits = parseInt(options.readCapacityUnits || 5, 10);
@@ -69,7 +70,7 @@ export class DynamoDBStore extends session.Store {
           TableName: this.table,
         }).promise();
       this._tableInfo = info;
-      // console.log(info)
+      // console.log(JSON.stringify(info, null, 4))
     } catch (err) {
       try {
         this._tableInfo = await this.client.createTable(
@@ -79,7 +80,7 @@ export class DynamoDBStore extends session.Store {
               {
                 AttributeName: this.hashKey,
                 AttributeType: 'S',
-              },
+              }
             ],
             KeySchema: [
               {
@@ -131,6 +132,9 @@ export class DynamoDBStore extends session.Store {
       } else {
         const sessStr = result.Item.sess.S.toString();
         const sess = JSON.parse(sessStr);
+        if (result.Item && result.Item.ttl) {
+          sess.__ttl__ = +(result.Item[this.options.ttlFieldName].N as string)
+        }
         return fn(null, sess);
       }
     }
@@ -178,6 +182,9 @@ export class DynamoDBStore extends session.Store {
         },
         sess: {
           S: sess,
+        },
+        [this.options.ttlFieldName]: {
+          N: this.getTTLValue().toString(),
         },
       },
     };
@@ -260,11 +267,18 @@ export class DynamoDBStore extends session.Store {
           S: sid,
         }
       },
-      UpdateExpression: 'set expires = :e',
+      UpdateExpression: 'set expires = :e, #ttl = :ttl',
+      ExpressionAttributeNames: {
+        '#ttl': this.options.ttlFieldName
+      },
       ExpressionAttributeValues: {
         ':e': {
           N: JSON.stringify(expires),
         },
+        ':ttl': {
+          N: this.getTTLValue().toString()
+        }
+
       },
       ReturnValues: 'UPDATED_NEW',
     };
@@ -276,7 +290,7 @@ export class DynamoDBStore extends session.Store {
     } catch (error) {
       fn && fn(error);
       throw error;
-    }    
+    }
   }
 
   /**
@@ -292,6 +306,14 @@ export class DynamoDBStore extends session.Store {
     return Math.floor(expires / 1000);
   }
 
+  /**
+   * get value for set TTL 
+   * @returns 
+   */
+  getTTLValue() {
+    const now = new Date().getTime();
+    return Math.floor(now / 1000) + this.options.ttl;
+  }
   /**
   * Clear intervals
   *
