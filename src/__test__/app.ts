@@ -1,7 +1,7 @@
 import express from 'express';
 import expressSession from 'express-session';
 import connectSession from "../../src/index";
-import AWS from 'aws-sdk';
+import {DynamoDBClient} from "@aws-sdk/client-dynamodb";
 
 
 export function app(maxAge = 1000) {
@@ -9,8 +9,8 @@ export function app(maxAge = 1000) {
   const options = {
     saveUninitialized: true,
     resave: true,
-    client: new AWS.DynamoDB({
-      endpoint: new AWS.Endpoint('http://localhost:8000'),
+    client: new DynamoDBClient({
+      endpoint: 'http://localhost:8000',
       region: 'us-east-1'
     })
   };

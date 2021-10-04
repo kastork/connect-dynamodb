@@ -4,9 +4,17 @@
  * MIT Licensed
  */
 
-import AWS from 'aws-sdk';
 import session from 'express-session';
-import { oneDayInMilliseconds } from './constants';
+import {oneDayInMilliseconds} from './constants';
+import {
+  CreateTableCommand, DeleteItemCommand,
+  DescribeTableCommand,
+  DescribeTableCommandOutput,
+  DynamoDBClient,
+  GetItemCommand,
+  PutItemCommand, ResourceInUseException,
+  ScanCommand, UpdateItemCommand
+} from "@aws-sdk/client-dynamodb";
 
 export class DynamoDBStore extends session.Store {
   private connect: any = {};
@@ -16,18 +24,18 @@ export class DynamoDBStore extends session.Store {
   private hashKey: string;
   private readCapacityUnits: number;
   private writeCapacityUnits: number;
-  private client: AWS.DynamoDB;
+  private client: DynamoDBClient;
   private table: string;
   private reapInterval: number;
   private _reap: any;
   private _tableInfo: any = null;
 
   /**
-  * Initialize DynamoDBStore with the given `options`.
-  *
-  * @param {Object} options
-  * @api public
-  */
+   * Initialize DynamoDBStore with the given `options`.
+   *
+   * @param {Object} options
+   * @api public
+   */
   constructor(options: any = {}) {
     super(options);
 
@@ -42,15 +50,12 @@ export class DynamoDBStore extends session.Store {
     if (options.client) {
       this.client = options.client;
     } else {
-      if (options.AWSConfigPath) {
-        AWS.config.loadFromPath(options.AWSConfigPath);
-      } else if (options.AWSConfigJSON) {
-        AWS.config.update(options.AWSConfigJSON);
+      if (options.AWSConfigJSON) {
+        this.client = new DynamoDBClient(options);
       } else {
         const region = options.AWSRegion || 'us-east-1';
-        AWS.config.update({ region });
+        this.client = new DynamoDBClient({region});
       }
-      this.client = new AWS.DynamoDB();
     }
 
     this.table = options.table || 'sessions';
@@ -65,15 +70,14 @@ export class DynamoDBStore extends session.Store {
   async prepareTable() {
     if (this._tableInfo) return;
     try {
-      const info = await this.client.describeTable(
-        {
-          TableName: this.table,
-        }).promise();
+      const info: DescribeTableCommandOutput = await this.client.send(
+        new DescribeTableCommand({TableName: this.table})
+      );
       this._tableInfo = info;
       // console.log(JSON.stringify(info, null, 4))
     } catch (err) {
       try {
-        this._tableInfo = await this.client.createTable(
+        const createTableParams =
           {
             TableName: this.table,
             AttributeDefinitions: [
@@ -92,9 +96,9 @@ export class DynamoDBStore extends session.Store {
               ReadCapacityUnits: this.readCapacityUnits,
               WriteCapacityUnits: this.writeCapacityUnits,
             },
-          }).promise();
-      }
-      catch (err) {
+          };
+        this._tableInfo = await this.client.send(new CreateTableCommand(createTableParams));
+      } catch (err: any) {
         if (err.code !== 'ResourceInUseException') {
           console.log(err);
           throw err;
@@ -124,7 +128,7 @@ export class DynamoDBStore extends session.Store {
       ConsistentRead: true,
     };
     try {
-      const result = await this.client.getItem(params).promise();
+      const result = await this.client.send(new GetItemCommand(params));
       if (!(result.Item && result.Item.sess && result.Item.sess.S))
         return fn(null);
       else if (result.Item.expires && now >= +(result.Item.expires?.N || 0)) {
@@ -137,8 +141,7 @@ export class DynamoDBStore extends session.Store {
         }
         return fn(null, sess);
       }
-    }
-    catch (err) {
+    } catch (err) {
       return fn(err)
     }
   }
@@ -188,7 +191,7 @@ export class DynamoDBStore extends session.Store {
         },
       },
     };
-    await this.client.putItem(params).promise();
+    await this.client.send(new PutItemCommand(params));
   }
 
   /**
@@ -218,7 +221,7 @@ export class DynamoDBStore extends session.Store {
       AttributesToGet: [this.hashKey],
     };
     try {
-      const data = await this.client.scan(params).promise()
+      const data = await this.client.send(new ScanCommand(params))
       for await (const item of data.Items || []) {
         await this.destroy(item[this.hashKey].S || '');
       }
@@ -231,21 +234,21 @@ export class DynamoDBStore extends session.Store {
   }
 
   /**
-  * Destroy the session associated with the given `sid`.
-  *
-  * @param {String} sid
-  * @param {Function} fn
-  * @api public
-  */
+   * Destroy the session associated with the given `sid`.
+   *
+   * @param {String} sid
+   * @param {Function} fn
+   * @api public
+   */
   async destroy(sid: string, fn?: (err?: any) => void) {
 
-    await this.client.deleteItem({
+    await this.client.send(new DeleteItemCommand({
       TableName: this.table, Key: {
         [this.hashKey]: {
           S: sid = this.prefix + sid
         }
       }
-    }).promise();
+    }));
 
     fn && fn(null)
 
@@ -284,7 +287,7 @@ export class DynamoDBStore extends session.Store {
     };
 
     try {
-      const updated = await this.client.updateItem(params).promise();
+      const updated = await this.client.send(new UpdateItemCommand(params));
       fn && fn(null, updated);
       return updated;
     } catch (error) {
@@ -294,10 +297,10 @@ export class DynamoDBStore extends session.Store {
   }
 
   /**
-  * Calculates the expire value based on the configuration.
-  * @param  {Object} sess Session object.
-  * @return {Integer}      The expire on timestamp.
-  */
+   * Calculates the expire value based on the configuration.
+   * @param  {Object} sess Session object.
+   * @return {Integer}      The expire on timestamp.
+   */
   getExpiresValue(sess: any) {
     const expires =
       typeof sess.cookie.maxAge === 'number'
@@ -307,21 +310,23 @@ export class DynamoDBStore extends session.Store {
   }
 
   /**
-   * get value for set TTL 
-   * @returns 
+   * get value for set TTL
+   * @returns
    */
   getTTLValue() {
     const now = new Date().getTime();
     return Math.floor(now / 1000) + this.options.ttl;
   }
+
   /**
-  * Clear intervals
-  *
-  * @api public
-  */
+   * Clear intervals
+   *
+   * @api public
+   */
   clearInterval() {
     if (this._reap) clearInterval(this._reap);
   }
+
   // regenerate(re: any, fn: Function) {
 
   //   console.log(re)

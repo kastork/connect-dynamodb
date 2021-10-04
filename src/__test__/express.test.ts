@@ -44,7 +44,8 @@ describe('Test connect', () => {
         agent.get('/inc')
           .set('Cookie', cookies)
           .expect((res) => {
-            expect(res.body.count).toEqual(2)
+            const foo = res.body.count
+            expect(foo).toEqual(2)
           })
           .expect(200, done)
       })
